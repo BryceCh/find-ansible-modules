@@ -8,7 +8,9 @@ Python 3.8 or higher.
 
 ## Example Usage
 
-The script expects filenames with a `.yml` or `.yaml` extension as arguments. Using `find` and `xargs` we can feed a list of files to it:
+The script expects filenames with a `.yml` or `.yaml` extension as arguments.  
+
+Using `find` and `xargs` we can feed a list of files to it:
 
 ```
 cd my-role
