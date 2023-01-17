@@ -4,6 +4,12 @@ import argparse
 import sys
 import yaml
 
+__doc__ = """
+simple script to look for modules used in an ansible playbook
+"""
+
+# Set acceptable extensions for analyzed files
+extensions = ['.yml','.yaml']
 
 # from https://docs.ansible.com/ansible/latest/reference_appendices/playbooks_keywords.html
 ANSIBLE_KEYWORDS = (
@@ -19,7 +25,6 @@ ANSIBLE_KEYWORDS = (
         'remote_user', 'rescue', 'retries', 'roles', 'run_once', 'serial',
         'strategy', 'tags', 'throttle', 'timeout', 'until', 'vars',
         'vars_files', 'vars_prompt', 'when')
-
 
 def extract_candidates(yaml_content):
     candidates = []
@@ -53,7 +58,9 @@ def parse_cli_args():
     parser = argparse.ArgumentParser(
             description='Look for modules used in an ansible playbook')
     parser.add_argument(
-            'filename', nargs='*',
+            'filename',
+            type=str, nargs='+',
+            default=[],
             help='playbook or task file to parse for list of modules')
 
     parsed = parser.parse_args()
@@ -66,9 +73,10 @@ def parse_cli_args():
 
 
 def main(args):
+    exts = tuple(extensions)
     for filename in args.filename:
-        if not filename.endswith('.yml'):
-            sys.stderr.write(f'{filename}: does not end in ".yml", skipping\n')
+        if not filename.endswith(exts):
+            sys.stderr.write(f'{filename}: does not end in one of {exts}; skipping\n')
             continue
 
         with open(filename, 'r') as content:
@@ -92,9 +100,12 @@ def main(args):
         for keyword in ANSIBLE_KEYWORDS:
             while keyword in candidates:
                 candidates.remove(keyword)
-
-        print(f'Modules found in {filename}:')
-        print('\n'.join(sorted(set(candidates))), '\n')
+        
+        if (len(candidates) > 0): 
+          print(f'Modules found in {filename}:')
+          print('\n'.join(sorted(set(candidates))) + '\n')
+        else:
+          print(f'No modules found in {filename}')
 
     return 0
 
